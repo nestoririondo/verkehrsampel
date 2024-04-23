@@ -86,7 +86,7 @@ const TrafficControl = () => {
     abortController.current.abort();
     abortController.current = new AbortController();
     turnTrafficLightRed(setMainStreetLight, 0);
-    await turnTrafficLightRed(setSideStreetLight, 0);
+    await turnTrafficLightRed(setSideStreetLight, 0); // this await prevents pedestrian light from turning green before all traffic lights are red
   };
 
   const handleRequest = async () => {
