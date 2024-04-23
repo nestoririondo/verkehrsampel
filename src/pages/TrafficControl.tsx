@@ -2,7 +2,7 @@ import {
   LightColor,
   useTrafficControl,
   PedestrianLightColor,
-} from "../context/TrafficControlContext";
+} from "../hooks/useTrafficControl";
 import TrafficLight from "../components/TrafficLight";
 import PedestrianLight from "../components/PedestrianLight";
 import { useRef, useEffect, useState } from "react";

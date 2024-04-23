@@ -1,4 +1,4 @@
-import { createContext, useState, useContext } from "react";
+import { useState } from "react";
 
 export enum LightColor {
   Green = "green",
@@ -23,28 +23,7 @@ type TrafficControlContextType = {
   setPedestrianRequest: (request: boolean) => void;
 };
 
-type TrafficControlProviderProps = {
-  children: React.ReactNode;
-};
-
-const initialState: TrafficControlContextType = {
-  mainStreetLight: LightColor.Green,
-  setMainStreetLight: () => {},
-  sideStreetLight: LightColor.Red,
-  setSideStreetLight: () => {},
-  pedestrianLight: PedestrianLightColor.Stand,
-  setPedestrianLight: () => {},
-  pedestrianRequest: false,
-  setPedestrianRequest: () => {},
-};
-
-const TrafficControlContext = createContext<TrafficControlContextType>(initialState);
-
-export const useTrafficControl = () => useContext(TrafficControlContext);
-
-export const TrafficControlProvider = ({
-  children,
-}: TrafficControlProviderProps) => {
+export const useTrafficControl = () => {
   const [mainStreetLight, setMainStreetLight] = useState(LightColor.Green);
   const [sideStreetLight, setSideStreetLight] = useState(LightColor.Red);
   const [pedestrianLight, setPedestrianLight] = useState(
@@ -52,7 +31,7 @@ export const TrafficControlProvider = ({
   );
   const [pedestrianRequest, setPedestrianRequest] = useState(false);
 
-  const value = {
+  return {
     mainStreetLight,
     setMainStreetLight,
     sideStreetLight,
@@ -62,10 +41,4 @@ export const TrafficControlProvider = ({
     pedestrianRequest,
     setPedestrianRequest,
   };
-
-  return (
-    <TrafficControlContext.Provider value={value}>
-      {children}
-    </TrafficControlContext.Provider>
-  );
 };
