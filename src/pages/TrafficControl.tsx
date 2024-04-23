@@ -5,10 +5,12 @@ import {
 } from "../context/TrafficControlContext";
 import TrafficLight from "../components/TrafficLight";
 import PedestrianLight from "../components/PedestrianLight";
-import { useRef, useEffect } from "react";
-import { Container, Typography } from "@mui/material";
+import { useRef, useEffect, useState } from "react";
+import { Button, Container, Typography } from "@mui/material";
 
 const TrafficControl = () => {
+  const [start, setStart] = useState(false);
+
   const {
     mainStreetLight,
     setMainStreetLight,
@@ -30,6 +32,22 @@ const TrafficControl = () => {
         reject();
       });
     });
+  };
+
+  const handleStart = () => {
+    if (start) {
+      resetTraffic();
+    }
+    setStart((prev) => !prev);
+  };
+
+  const resetTraffic = () => {
+    abortController.current.abort();
+    abortController.current = new AbortController();
+    setMainStreetLight(LightColor.Green);
+    setSideStreetLight(LightColor.Red);
+    setPedestrianLight(PedestrianLightColor.Stand);
+    setPedestrianRequest(false);
   };
 
   const turnTrafficLightRed = async (
@@ -83,10 +101,11 @@ const TrafficControl = () => {
   };
 
   useEffect(() => {
+    if (!start) return;
     if (pedestrianRequest) return;
     if (pedestrianLight === PedestrianLightColor.Walk) return;
     controlTraffic();
-  }, [mainStreetLight, sideStreetLight]);
+  }, [mainStreetLight, sideStreetLight, start]);
 
   return (
     <Container
@@ -95,11 +114,15 @@ const TrafficControl = () => {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
+        gap: 4,
       }}
     >
-      <Typography variant="h3" sx={{ p: 5 }}>
-        Traffic Lights Demo
+      <Typography variant="h3" sx={{ mt: 4 }}>
+        Verkehrsampel
       </Typography>
+      <Button variant="contained" onClick={handleStart}>
+        {start ? "Stop" : "Start"}
+      </Button>
       <Container
         sx={{
           display: "flex",
@@ -109,11 +132,12 @@ const TrafficControl = () => {
           gap: 2,
         }}
       >
-        <TrafficLight light={mainStreetLight} />
-        <TrafficLight light={sideStreetLight} />
+        <TrafficLight light={mainStreetLight} name="Hauptstraße" />
+        <TrafficLight light={sideStreetLight} name="Nebenstraße" />
         <PedestrianLight
           handleRequest={handleRequest}
           pedestrianLight={pedestrianLight}
+          start={start}
         />
       </Container>
     </Container>

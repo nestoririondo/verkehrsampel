@@ -1,27 +1,30 @@
 import BackHandIcon from "@mui/icons-material/BackHand";
-import { Box, Button } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 
 type PedestrianLightProps = {
   handleRequest: () => void;
   pedestrianLight: "red" | "green";
+  start: boolean;
 };
 
 const PedestrianLight = ({
   handleRequest,
   pedestrianLight,
+  start
 }: PedestrianLightProps) => {
   const lamps = ["red", "green"];
 
   return (
     <Box
       sx={{
-        mt: "auto",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        gap: 2,
+        justifyContent: "space-between",
+        mb:'auto',
       }}
     >
+      <Typography sx={{textAlign:"center"}} variant="h6">Fußgängerampel</Typography>
       <Box
         sx={{
           width: 100,
@@ -32,7 +35,7 @@ const PedestrianLight = ({
           justifyContent: "space-between",
           alignItems: "center",
           backgroundColor: "lightgray",
-          p: 1,
+          p: 2,
           borderRadius: 2,
         }}
       >
@@ -53,8 +56,10 @@ const PedestrianLight = ({
         variant="outlined"
         onClick={handleRequest}
         startIcon={<BackHandIcon />}
+        disabled={!start || pedestrianLight === "green"}
+        sx={{ mt: 2 }}
       >
-        Request
+        Anfrage
       </Button>
     </Box>
   );
