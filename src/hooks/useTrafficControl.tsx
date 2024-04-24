@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useReducer } from "react";
 
 export enum LightColor {
   G = "green",
@@ -27,44 +27,20 @@ type LightState =
   | "RYR" // red, yellow, red
   | "XRR" // red-yellow, red, red - CYCLE COMPLETE
   | "RRG"; // red, red, green - PEDESTRIAN LIGHT
-
-type RequestState = boolean;
-type TimerId = NodeJS.Timeout | undefined;
-
+type RequestState = boolean; // true if pedestrian requested
+type TimerId = NodeJS.Timeout | null;
 type State = [LightState, RequestState, TimerId];
 
+const initialState: State = ["GRR", false, null];
+
 export const useTrafficControl = () => {
-  const [state, setState] = useState<State>(["GRR", false, undefined]);
-  const [mainStreetLight, setMainStreetLight] = useState<LightColor>(
-    LightColor.G
-  );
-  const [sideStreetLight, setSideStreetLight] = useState<LightColor>(
-    LightColor.R
-  );
-  const [pedestrianLight, setPedestrianLight] = useState<PedestrianLightColor>(
-    PedestrianLightColor.Stand
-  );
-
-  const setAndScheduleNextState = (
-    lightState: LightState,
-    delay: number,
-    timerId: TimerId
-  ) => {
-    clearTimeout(String(timerId));
-    const newTimerId = setTimeout(() => {
-      setState((prev) => {
-        return processState(prev, Action.NEXT);
-      });
-    }, delay);
-    return [lightState, false, newTimerId];
-  };
-
-  const processState = (state: State, action: Action) => {
+  
+  const reducer = (state: State, action: Action): State => {
     switch (action) {
       case Action.START:
-        return setAndScheduleNextState("GRR", 5000, undefined);
+        return setAndScheduleNextState("GRR", 5000, null);
       case Action.STOP:
-        return ["GRR", false, undefined];
+        return ["GRR", false, null];
       case Action.NEXT:
         switch (state[0]) {
           case "GRR":
@@ -82,34 +58,54 @@ export const useTrafficControl = () => {
           case "RRG":
             return setAndScheduleNextState("GRR", 5000, state[2]);
           default:
-            return ["GRR", false, undefined];
+            return ["GRR", false, null];
         }
       case Action.REQUEST:
         return setAndScheduleNextState("RRG", 5000, state[2]);
       case Action.STOP:
-        return ["GRR", false, undefined];
+        return ["GRR", false, null];
       default:
-        return ["GRR", false, undefined];
+        return ["GRR", false, null];
     }
   };
+  const setAndScheduleNextState = (
+    lightState: LightState,
+    delay: number,
+    timerId: TimerId
+  ) => {
+    clearTimeout(String(timerId));
+    const newTimerId = setTimeout(() => {
+      dispatch(Action.NEXT);
+    }, delay);
+    return [lightState, false, newTimerId];
+  };
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  const [mainStreetLight, setMainStreetLight] = useState<LightColor>(
+    LightColor.G
+  );
+  const [sideStreetLight, setSideStreetLight] = useState<LightColor>(
+    LightColor.R
+  );
+  const [pedestrianLight, setPedestrianLight] = useState<PedestrianLightColor>(
+    PedestrianLightColor.R
+  );
+
+
 
   const handleStart = () => {
-    setState((state) => {
-      return processState(state, Action.START);
-    });
+    dispatch(Action.START);
   };
 
   const handleRequest = () => {
-    setState((state) => {
-      return processState(state, Action.REQUEST);
-    });
+    dispatch(Action.REQUEST);
   };
 
   const handleStop = () => {
-    clearTimeout(state[2]);
-    setState((state) => {
-      return processState(state, Action.STOP);
-    });
+    if (state[2] !== null) {
+      clearTimeout(state[2] as NodeJS.Timeout);
+    }
+    dispatch(Action.STOP);
   };
 
   useEffect(() => {
@@ -118,7 +114,6 @@ export const useTrafficControl = () => {
     setPedestrianLight(
       PedestrianLightColor[state[0][2] as keyof typeof PedestrianLightColor]
     );
-    console.log(state);
   }, [state]);
 
   return {
