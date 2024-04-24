@@ -11,6 +11,7 @@ const TrafficControl = () => {
     handleStart,
     handleRequest,
     handleStop,
+    isActive,
   } = useTrafficControl();
 
   return (
@@ -26,12 +27,15 @@ const TrafficControl = () => {
       <Typography variant="h3" sx={{ mt: 4 }}>
         Verkehrsampel
       </Typography>
-      <Button variant="contained" onClick={() => handleStart()}>
-        Start
-      </Button>
-      <Button variant="outlined" onClick={() => handleStop()}>
-        Stop
-      </Button>
+      {!isActive ? (
+        <Button variant="contained" onClick={handleStart}>
+          Start
+        </Button>
+      ) : (
+        <Button variant="outlined" onClick={handleStop}>
+          Stop
+        </Button>
+      )}
       <Container
         sx={{
           display: "flex",
@@ -43,7 +47,11 @@ const TrafficControl = () => {
       >
         <TrafficLight light={mainStreetLight} name="Hauptstraße" />
         <TrafficLight light={sideStreetLight} name="Nebenstraße" />
-        <PedestrianLight pedestrianLight={pedestrianLight} handleRequest={handleRequest} />
+        <PedestrianLight
+          pedestrianLight={pedestrianLight}
+          handleRequest={handleRequest}
+          isActive={isActive}
+        />
       </Container>
     </Container>
   );

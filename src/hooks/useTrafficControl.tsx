@@ -72,7 +72,7 @@ export const useTrafficControl = () => {
     lightState: LightState,
     delay: number,
     timerId: TimerId
-  ) => {
+  ): State => {
     clearTimeout(String(timerId));
     const newTimerId = setTimeout(() => {
       dispatch(Action.NEXT);
@@ -90,7 +90,7 @@ export const useTrafficControl = () => {
   const [pedestrianLight, setPedestrianLight] = useState<PedestrianLightColor>(
     PedestrianLightColor.R
   );
-
+  const [isActive, setIsActive] = useState(false);
 
 
   const handleStart = () => {
@@ -114,6 +114,7 @@ export const useTrafficControl = () => {
     setPedestrianLight(
       PedestrianLightColor[state[0][2] as keyof typeof PedestrianLightColor]
     );
+    setIsActive(state[2] !== null);
   }, [state]);
 
   return {
@@ -123,5 +124,6 @@ export const useTrafficControl = () => {
     handleStart,
     handleRequest,
     handleStop,
+    isActive,
   };
 };
