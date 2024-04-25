@@ -113,8 +113,7 @@ export const useTrafficControl = () => {
   };
 
   const handleRequest = () => {
-    if (isRequest) return;
-    setIsRequest(true);
+    if (state[1]) return;
     dispatch(Action.REQUEST);
   };
 
