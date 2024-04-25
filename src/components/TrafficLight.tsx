@@ -1,8 +1,8 @@
-import { LightColor } from "../hooks/useTrafficControl";
+import { TrafficLightColor } from "../hooks/useTrafficControl";
 import { Box, Typography } from "@mui/material";
 
 type TrafficLightProps = {
-  light: LightColor;
+  light: TrafficLightColor;
   name: string;
 };
 
