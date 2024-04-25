@@ -4,10 +4,10 @@ import { Box, Button, Typography } from "@mui/material";
 type PedestrianLightProps = {
   pedestrianLight: "red" | "green";
   handleRequest: () => void;
-  isActive: boolean;
+  isRequest: boolean;
 };
 
-const PedestrianLight = ({ pedestrianLight, handleRequest, isActive }: PedestrianLightProps) => {
+const PedestrianLight = ({ pedestrianLight, handleRequest, isRequest }: PedestrianLightProps) => {
   const lamps = ["red", "green"];
 
   return (
@@ -53,7 +53,7 @@ const PedestrianLight = ({ pedestrianLight, handleRequest, isActive }: Pedestria
       <Button
         variant="outlined"
         startIcon={<BackHandIcon />}
-        disabled={pedestrianLight === "green" || !isActive}
+        disabled={pedestrianLight === "green" || isRequest}
         sx={{ mt: 2 }}
         onClick={handleRequest}
       >

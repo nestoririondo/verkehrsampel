@@ -12,6 +12,7 @@ const TrafficControl = () => {
     handleRequest,
     handleStop,
     isActive,
+    isRequest
   } = useTrafficControl();
 
   return (
@@ -50,7 +51,7 @@ const TrafficControl = () => {
         <PedestrianLight
           pedestrianLight={pedestrianLight}
           handleRequest={handleRequest}
-          isActive={isActive}
+          isRequest={isRequest}
         />
       </Container>
     </Container>
