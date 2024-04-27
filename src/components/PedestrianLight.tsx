@@ -5,9 +5,10 @@ type PedestrianLightProps = {
   pedestrianLight: "red" | "green";
   handleRequest: () => void;
   isRequest: boolean;
+  isActive: boolean;
 };
 
-const PedestrianLight = ({ pedestrianLight, handleRequest, isRequest }: PedestrianLightProps) => {
+const PedestrianLight = ({ pedestrianLight, handleRequest, isRequest, isActive }: PedestrianLightProps) => {
   const lamps = ["red", "green"];
 
   return (
@@ -53,7 +54,7 @@ const PedestrianLight = ({ pedestrianLight, handleRequest, isRequest }: Pedestri
       <Button
         variant="outlined"
         startIcon={<BackHandIcon />}
-        disabled={pedestrianLight === "green" || isRequest}
+        disabled={pedestrianLight === "green" || isRequest || !isActive}
         sx={{ mt: 2 }}
         onClick={handleRequest}
       >

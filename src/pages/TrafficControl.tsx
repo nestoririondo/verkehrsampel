@@ -5,9 +5,7 @@ import { useTrafficControl } from "../hooks/useTrafficControl";
 
 const TrafficControl = () => {
   const {
-    mainStreetLight,
-    sideStreetLight,
-    pedestrianLight,
+    lights,
     handleStart,
     handleRequest,
     handleStop,
@@ -46,12 +44,13 @@ const TrafficControl = () => {
           gap: 2,
         }}
       >
-        <TrafficLight light={mainStreetLight} name="Hauptstraße" />
-        <TrafficLight light={sideStreetLight} name="Nebenstraße" />
+        <TrafficLight light={lights.main} name="Hauptstraße" />
+        <TrafficLight light={lights.side} name="Nebenstraße" />
         <PedestrianLight
-          pedestrianLight={pedestrianLight}
+          pedestrianLight={lights.pedestrian}
           handleRequest={handleRequest}
           isRequest={isRequest}
+          isActive={isActive}
         />
       </Container>
     </Container>
