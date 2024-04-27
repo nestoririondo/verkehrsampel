@@ -1,14 +1,18 @@
 import BackHandIcon from "@mui/icons-material/BackHand";
 import { Box, Button, Typography } from "@mui/material";
+import { Action, State } from "../hooks/useTrafficControl";
 
 type PedestrianLightProps = {
   pedestrianLight: "red" | "green";
-  handleRequest: () => void;
-  isRequest: boolean;
-  isActive: boolean;
+  dispatch: (action: Action) => void;
+  state: State;
 };
 
-const PedestrianLight = ({ pedestrianLight, handleRequest, isRequest, isActive }: PedestrianLightProps) => {
+const PedestrianLight = ({
+  pedestrianLight,
+  dispatch,
+  state,
+}: PedestrianLightProps) => {
   const lamps = ["red", "green"];
 
   return (
@@ -54,9 +58,11 @@ const PedestrianLight = ({ pedestrianLight, handleRequest, isRequest, isActive }
       <Button
         variant="outlined"
         startIcon={<BackHandIcon />}
-        disabled={pedestrianLight === "green" || isRequest || !isActive}
+        disabled={
+          pedestrianLight === "green" || !state.timerId || state.requestState
+        }
         sx={{ mt: 2 }}
-        onClick={handleRequest}
+        onClick={() => dispatch(Action.REQUEST)}
       >
         Anfrage
       </Button>

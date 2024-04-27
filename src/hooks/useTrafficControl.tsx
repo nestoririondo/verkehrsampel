@@ -12,7 +12,7 @@ export enum PedestrianLightColor {
   R = "red",
 }
 
-enum Action {
+export enum Action {
   START = "START",
   STOP = "STOP",
   NEXT = "NEXT",
@@ -34,7 +34,7 @@ type LightState =
   | "XRR" // red-yellow, red, red - ENDZUSTAND
   | "RRG"; // red, red, green
 type TimerId = NodeJS.Timeout | null;
-type State = {
+export type State = {
   lightState: LightState;
   requestState: boolean;
   timerId: TimerId;
@@ -49,11 +49,11 @@ const initialState: State = {
 const transitions: { [key in LightState]: { [key in Action]?: Transition } } = {
   GRR: {
     NEXT: { lightState: "YRR", requestState: false, delay: 1000 },
-    REQUEST: { lightState: "RRG", requestState: false, delay: 5000 },
+    REQUEST: { lightState: "YRR", requestState: true, delay: 1000 },
   },
   YRR: {
     NEXT: { lightState: "RXR", requestState: false, delay: 2000 },
-    REQUEST: { lightState: "RYR", requestState: true, delay: 1000 },
+    REQUEST: { lightState: "RRG", requestState: false, delay: 5000 },
   },
   RXR: {
     NEXT: { lightState: "RGR", requestState: false, delay: 5000 },
@@ -61,19 +61,19 @@ const transitions: { [key in LightState]: { [key in Action]?: Transition } } = {
   },
   RGR: {
     NEXT: { lightState: "RYR", requestState: false, delay: 1000 },
-    REQUEST: { lightState: "RRG", requestState: false, delay: 5000 },
+    REQUEST: { lightState: "RYR", requestState: false, delay: 1000 },
   },
   RYR: {
     NEXT: { lightState: "XRR", requestState: false, delay: 2000 },
-    REQUEST: { lightState: "YRR", requestState: true, delay: 1000 },
+    REQUEST: { lightState: "RRG", requestState: true, delay: 5000 },
   },
   XRR: {
     NEXT: { lightState: "GRR", requestState: false, delay: 5000 },
     REQUEST: { lightState: "YRR", requestState: true, delay: 1000 },
   },
   RRG: {
-    NEXT: { lightState: "GRR", requestState: false, delay: 5000 },
-    REQUEST: { lightState: "YRR", requestState: true, delay: 1000 },
+    NEXT: { lightState: "XRR", requestState: false, delay: 2000 },
+    REQUEST: { lightState: "XRR", requestState: true, delay: 2000 },
   },
 };
 
@@ -109,21 +109,6 @@ export const useTrafficControl = () => {
     side: TrafficLightColor.R,
     pedestrian: PedestrianLightColor.R,
   });
-  const [isActive, setIsActive] = useState(false);
-  const [isRequest, setIsRequest] = useState(false);
-
-  const handleStart = () => {
-    dispatch(Action.START);
-  };
-
-  const handleRequest = () => {
-    if (state.requestState) return;
-    dispatch(Action.REQUEST);
-  };
-
-  const handleStop = () => {
-    dispatch(Action.STOP);
-  };
 
   useEffect(() => {
     setLights({
@@ -138,16 +123,11 @@ export const useTrafficControl = () => {
           state.lightState[2] as keyof typeof PedestrianLightColor
         ],
     });
-    setIsActive(state.timerId !== null);
-    setIsRequest(state.requestState);
   }, [state.lightState, state.requestState, state.timerId]);
 
   return {
     lights,
-    handleStart,
-    handleRequest,
-    handleStop,
-    isActive,
-    isRequest,
+    state,
+    dispatch,
   };
 };

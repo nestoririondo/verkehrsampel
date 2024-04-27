@@ -1,17 +1,10 @@
 import TrafficLight from "../components/TrafficLight";
 import PedestrianLight from "../components/PedestrianLight";
 import { Button, Container, Typography } from "@mui/material";
-import { useTrafficControl } from "../hooks/useTrafficControl";
+import { useTrafficControl, Action } from "../hooks/useTrafficControl";
 
 const TrafficControl = () => {
-  const {
-    lights,
-    handleStart,
-    handleRequest,
-    handleStop,
-    isActive,
-    isRequest
-  } = useTrafficControl();
+  const { lights, state, dispatch } = useTrafficControl();
 
   return (
     <Container
@@ -26,12 +19,12 @@ const TrafficControl = () => {
       <Typography variant="h3" sx={{ mt: 4 }}>
         Verkehrsampel
       </Typography>
-      {!isActive ? (
-        <Button variant="contained" onClick={handleStart}>
+      {!state.timerId ? (
+        <Button variant="contained" onClick={() => dispatch(Action.START)}>
           Start
         </Button>
       ) : (
-        <Button variant="outlined" onClick={handleStop}>
+        <Button variant="outlined" onClick={() => dispatch(Action.STOP)}>
           Stop
         </Button>
       )}
@@ -48,9 +41,8 @@ const TrafficControl = () => {
         <TrafficLight light={lights.side} name="Nebenstraße" />
         <PedestrianLight
           pedestrianLight={lights.pedestrian}
-          handleRequest={handleRequest}
-          isRequest={isRequest}
-          isActive={isActive}
+          state={state}
+          dispatch={dispatch}
         />
       </Container>
     </Container>
