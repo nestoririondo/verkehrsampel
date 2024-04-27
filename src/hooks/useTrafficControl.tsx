@@ -19,6 +19,12 @@ enum Action {
   REQUEST = "REQUEST",
 }
 
+type Transition = {
+  lightState: LightState;
+  requestState: boolean;
+  delay: number;
+};
+
 type LightState =
   | "GRR" // green, red, red - ANFANGSZUSTAND
   | "YRR" // yellow, red, red
@@ -27,49 +33,74 @@ type LightState =
   | "RYR" // red, yellow, red
   | "XRR" // red-yellow, red, red - ENDZUSTAND
   | "RRG"; // red, red, green
-type RequestState = boolean; // true, wenn Fußgängeranfrage
-type TimerId = number | null;
-type State = [LightState, RequestState, TimerId];
+type TimerId = NodeJS.Timeout | null;
+type State = {
+  lightState: LightState;
+  requestState: boolean;
+  timerId: TimerId;
+};
 
-const initialState: State = ["GRR", false, null]; // grün, rot, rot, keine Anfrage, kein Timer
+const initialState: State = {
+  lightState: "GRR",
+  requestState: false,
+  timerId: null,
+}; // grün, rot, rot, keine Anfrage, kein Timer
 
-const transitions = {
-  GRR: { NEXT: ["YRR", false, 1000], REQUEST: ["YRR", true, 1000] },
-  YRR: { NEXT: ["RXR", false, 2000], REQUEST: ["RRG", false, 5000] },
-  RXR: { NEXT: ["RGR", false, 5000], REQUEST: ["RYR", true, 1000] },
-  RGR: { NEXT: ["RYR", false, 1000], REQUEST: ["RYR", true, 1000] },
-  RYR: { NEXT: ["XRR", false, 2000], REQUEST: ["RRG", false, 5000] },
-  XRR: { NEXT: ["GRR", false, 5000], REQUEST: ["YRR", true, 1000] },
-  RRG: { NEXT: ["XRR", false, 2000], REQUEST: ["GRR", false, 5000] },
+const transitions: { [key in LightState]: { [key in Action]?: Transition } } = {
+  GRR: {
+    NEXT: { lightState: "YRR", requestState: false, delay: 1000 },
+    REQUEST: { lightState: "RRG", requestState: false, delay: 5000 },
+  },
+  YRR: {
+    NEXT: { lightState: "RXR", requestState: false, delay: 2000 },
+    REQUEST: { lightState: "RYR", requestState: true, delay: 1000 },
+  },
+  RXR: {
+    NEXT: { lightState: "RGR", requestState: false, delay: 5000 },
+    REQUEST: { lightState: "RYR", requestState: true, delay: 1000 },
+  },
+  RGR: {
+    NEXT: { lightState: "RYR", requestState: false, delay: 1000 },
+    REQUEST: { lightState: "RRG", requestState: false, delay: 5000 },
+  },
+  RYR: {
+    NEXT: { lightState: "XRR", requestState: false, delay: 2000 },
+    REQUEST: { lightState: "YRR", requestState: true, delay: 1000 },
+  },
+  XRR: {
+    NEXT: { lightState: "GRR", requestState: false, delay: 5000 },
+    REQUEST: { lightState: "YRR", requestState: true, delay: 1000 },
+  },
+  RRG: {
+    NEXT: { lightState: "GRR", requestState: false, delay: 5000 },
+    REQUEST: { lightState: "YRR", requestState: true, delay: 1000 },
+  },
 };
 
 export const useTrafficControl = () => {
   const reducer = (state: State, action: Action): State => {
+    if (state.timerId) clearTimeout(state.timerId);
     if (action === Action.START) {
-      return setAndScheduleNextState("GRR", false, 5000, null);
+      return setAndScheduleNextState(initialState, 5000);
     }
     if (action === Action.STOP) {
       return initialState;
     }
-    const [lightState, _, timerId] = state;
-    const nextState = transitions[lightState][action] as [
-      LightState,
-      RequestState,
-      number
-    ];
-    return setAndScheduleNextState(...nextState, timerId);
+    const transition = transitions[state.lightState][action];
+    if (!transition) {
+      throw new Error(`Invalid action ${action} for state ${state.lightState}`);
+    }
+    const { lightState, requestState, delay } = transition;
+    return setAndScheduleNextState(
+      { lightState, requestState, timerId: null },
+      delay
+    );
   };
-  const setAndScheduleNextState = (
-    lightState: LightState,
-    request: RequestState,
-    delay: number,
-    timerId: TimerId
-  ): State => {
-    clearTimeout(Number(timerId));
-    const newTimerId = setTimeout(() => {
-      request ? dispatch(Action.REQUEST) : dispatch(Action.NEXT);
+  const setAndScheduleNextState = (state: State, delay: number): State => {
+    const timerId: TimerId = setTimeout(() => {
+      state.requestState ? dispatch(Action.REQUEST) : dispatch(Action.NEXT);
     }, delay);
-    return [lightState, request, Number(newTimerId)];
+    return { ...state, timerId };
   };
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -86,26 +117,30 @@ export const useTrafficControl = () => {
   };
 
   const handleRequest = () => {
-    if (state[1]) return;
+    if (state.requestState) return;
     dispatch(Action.REQUEST);
   };
 
   const handleStop = () => {
-    if (state[2] !== null) {
-      clearTimeout(state[2]);
-    }
     dispatch(Action.STOP);
   };
 
   useEffect(() => {
     setLights({
-      main: TrafficLightColor[state[0][0] as keyof typeof TrafficLightColor],
-      side: TrafficLightColor[state[0][1] as keyof typeof TrafficLightColor],
-      pedestrian: PedestrianLightColor[state[0][2] as keyof typeof PedestrianLightColor],
+      main: TrafficLightColor[
+        state.lightState[0] as keyof typeof TrafficLightColor
+      ],
+      side: TrafficLightColor[
+        state.lightState[1] as keyof typeof TrafficLightColor
+      ],
+      pedestrian:
+        PedestrianLightColor[
+          state.lightState[2] as keyof typeof PedestrianLightColor
+        ],
     });
-    setIsActive(state[2] !== null);
-    setIsRequest(state[1]);
-  }, [state[0], state[1], state[2]]);
+    setIsActive(state.timerId !== null);
+    setIsRequest(state.requestState);
+  }, [state.lightState, state.requestState, state.timerId]);
 
   return {
     lights,
