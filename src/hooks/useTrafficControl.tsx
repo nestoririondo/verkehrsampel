@@ -110,20 +110,39 @@ export const useTrafficControl = () => {
     pedestrian: PedestrianLightColor.R,
   });
 
+  const mapTrafficLightColor = (char: string): TrafficLightColor => {
+    switch (char) {
+      case "G":
+        return TrafficLightColor.G;
+      case "Y":
+        return TrafficLightColor.Y;
+      case "R":
+        return TrafficLightColor.R;
+      case "X":
+        return TrafficLightColor.X;
+      default:
+        throw new Error("Invalid Traffic Light Color");
+    }
+  };
+
+  const mapPedestrianLightColor = (char: String): PedestrianLightColor => {
+    switch (char) {
+      case "G":
+        return PedestrianLightColor.G;
+      case "R":
+        return PedestrianLightColor.R;
+      default:
+        throw new Error(`Not valid character: ${char}.`);
+    }
+  };
+
   useEffect(() => {
     setLights({
-      main: TrafficLightColor[
-        state.lightState[0] as keyof typeof TrafficLightColor
-      ],
-      side: TrafficLightColor[
-        state.lightState[1] as keyof typeof TrafficLightColor
-      ],
-      pedestrian:
-        PedestrianLightColor[
-          state.lightState[2] as keyof typeof PedestrianLightColor
-        ],
+      main: mapTrafficLightColor(state.lightState[0]),
+      side: mapTrafficLightColor(state.lightState[1]),
+      pedestrian: mapPedestrianLightColor(state.lightState[2]),
     });
-  }, [state.lightState, state.requestState, state.timerId]);
+  }, [state.lightState]);
 
   return {
     lights,
