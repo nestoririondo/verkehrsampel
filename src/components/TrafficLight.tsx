@@ -7,7 +7,7 @@ type TrafficLightProps = {
 };
 
 const TrafficLight = ({ light, name }: TrafficLightProps) => {
-  const lamps = ["red", "yellow", "green"];
+  const lamps = [TrafficLightColor.R, TrafficLightColor.Y, TrafficLightColor.G];
 
   return (
     <Box>
