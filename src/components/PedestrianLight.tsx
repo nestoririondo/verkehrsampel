@@ -1,9 +1,9 @@
 import BackHandIcon from "@mui/icons-material/BackHand";
 import { Box, Button, Typography } from "@mui/material";
-import { Action, State } from "../hooks/useTrafficControl";
+import { Action, PedestrianLightColor, State } from "../hooks/useTrafficControl";
 
 type PedestrianLightProps = {
-  pedestrianLight: "red" | "green";
+  pedestrianLight: PedestrianLightColor;
   dispatch: (action: Action) => void;
   state: State;
 };
@@ -13,7 +13,7 @@ const PedestrianLight = ({
   dispatch,
   state,
 }: PedestrianLightProps) => {
-  const lamps = ["red", "green"];
+  const lamps = [PedestrianLightColor.R, PedestrianLightColor.G];
 
   return (
     <Box

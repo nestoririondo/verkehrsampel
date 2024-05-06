@@ -80,30 +80,38 @@ const transitions: { [key in LightState]: { [key in Action]?: Transition } } = {
 export const useTrafficControl = () => {
   const reducer = (state: State, action: Action): State => {
     if (state.timerId) clearTimeout(state.timerId);
-    if (action === Action.START) {
-      return setAndScheduleNextState(initialState, 5000);
-    }
-    if (action === Action.STOP) {
-      return initialState;
-    }
-    const transition = transitions[state.lightState][action];
-    if (!transition) {
-      throw new Error(`Invalid action ${action} for state ${state.lightState}`);
-    }
-    const { lightState, requestState, delay } = transition;
-    return setAndScheduleNextState(
-      { lightState, requestState, timerId: null },
-      delay
-    );
-  };
-  const setAndScheduleNextState = (state: State, delay: number): State => {
-    const timerId: TimerId = setTimeout(() => {
-      state.requestState ? dispatch(Action.REQUEST) : dispatch(Action.NEXT);
-    }, delay);
-    return { ...state, timerId };
-  };
-  const [state, dispatch] = useReducer(reducer, initialState);
 
+    switch (action) {
+      case Action.START: {
+        const timerId: TimerId = setTimeout(() => {
+          dispatch(Action.NEXT);
+        }, 5000);
+        return { ...initialState, timerId };
+      }
+
+      case Action.STOP:
+        return initialState;
+
+      case Action.NEXT:
+      case Action.REQUEST: {
+        const transition = transitions[state.lightState][action];
+        if (!transition) {
+          throw new Error(`Invalid action ${action} for state ${state.lightState}`);
+        }
+        const { lightState, requestState, delay } = transition;
+        const timerId: TimerId = setTimeout(() => {
+          dispatch(requestState ? Action.REQUEST : Action.NEXT);
+        }, delay);
+        return { lightState, requestState, timerId };
+      }
+
+      default:
+        throw new Error(`Unhandled action type: ${action}`);
+    }
+  };
+
+  const [state, dispatch] = useReducer(reducer, initialState);
+  
   const [lights, setLights] = useState({
     main: TrafficLightColor.G,
     side: TrafficLightColor.R,
