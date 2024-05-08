@@ -1,17 +1,26 @@
-import { TrafficLightColor } from "../hooks/useTrafficControl";
+import {
+  TrafficLightColor,
+  useTrafficControl,
+} from "../hooks/useTrafficControl";
 import { Box, Typography } from "@mui/material";
 
 type TrafficLightProps = {
-  light: TrafficLightColor;
+  light: string;
   name: string;
 };
 
 const TrafficLight = ({ light, name }: TrafficLightProps) => {
   const lamps = [TrafficLightColor.R, TrafficLightColor.Y, TrafficLightColor.G];
 
+  const { mapTrafficLightColor } = useTrafficControl();
+
+  const thisLight = mapTrafficLightColor(light)
+
   return (
     <Box>
-      <Typography sx={{textAlign:"center"}} variant="h6">{name}</Typography>
+      <Typography sx={{ textAlign: "center" }} variant="h6">
+        {name}
+      </Typography>
       <Box
         sx={{
           width: 100,
@@ -34,7 +43,7 @@ const TrafficLight = ({ light, name }: TrafficLightProps) => {
               height: 80,
               borderRadius: "50%",
               backgroundColor:
-                light === color || (light === "red-yellow" && color !== "green")
+              thisLight === color || (thisLight === "red-yellow" && color !== "green")
                   ? color
                   : "gray",
             }}

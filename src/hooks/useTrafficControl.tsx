@@ -111,12 +111,6 @@ export const useTrafficControl = () => {
   };
 
   const [state, dispatch] = useReducer(reducer, initialState);
-  
-  const [lights, setLights] = useState({
-    main: TrafficLightColor.G,
-    side: TrafficLightColor.R,
-    pedestrian: PedestrianLightColor.R,
-  });
 
   const mapTrafficLightColor = (char: string): TrafficLightColor => {
     switch (char) {
@@ -144,17 +138,10 @@ export const useTrafficControl = () => {
     }
   };
 
-  useEffect(() => {
-    setLights({
-      main: mapTrafficLightColor(state.lightState[0]),
-      side: mapTrafficLightColor(state.lightState[1]),
-      pedestrian: mapPedestrianLightColor(state.lightState[2]),
-    });
-  }, [state.lightState]);
-
   return {
-    lights,
     state,
     dispatch,
+    mapPedestrianLightColor,
+    mapTrafficLightColor
   };
 };

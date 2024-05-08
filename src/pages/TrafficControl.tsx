@@ -4,8 +4,8 @@ import { Button, Container, Typography } from "@mui/material";
 import { useTrafficControl, Action } from "../hooks/useTrafficControl";
 
 const TrafficControl = () => {
-  const { lights, state, dispatch } = useTrafficControl();
-
+  const { state, dispatch } = useTrafficControl();
+  
   return (
     <Container
       sx={{
@@ -37,10 +37,10 @@ const TrafficControl = () => {
           gap: 2,
         }}
       >
-        <TrafficLight light={lights.main} name="Hauptstraße" />
-        <TrafficLight light={lights.side} name="Nebenstraße" />
+        <TrafficLight light={state.lightState[0]} name="Hauptstraße" />
+        <TrafficLight light={state.lightState[1]} name="Nebenstraße" />
         <PedestrianLight
-          pedestrianLight={lights.pedestrian}
+          pedestrianLight={state.lightState[2]}
           state={state}
           dispatch={dispatch}
         />
